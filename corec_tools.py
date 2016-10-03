@@ -164,7 +164,7 @@ def run_bash_command(command):
 
 	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
 
-	for line in iter(p.stdout.readline, ""):
+	for line in iter(process.stdout.readline, ""):
 		logging.info('{} --> {} -> {}'.format(progress, command, line.replace('\n', '')))
 
 	output, error = process.communicate()
@@ -218,9 +218,9 @@ def has_progress(progress_string):
 	def decorator(f):
 		def wrapper(*args, **kwargs):
 
-			progress_string = " --> {}{}".format(progress_string, get_it(kwargs['node']))
+			local_progress_string = " --> {}{}".format(progress_string, get_id(kwargs['node']))
 			current_progress = read_progress()
-			append_progress(progress_string)
+			append_progress(local_progress_string)
 			ret = f(*args, **kwargs)
 			save_progress(current_progress)
 			return ret
@@ -258,7 +258,7 @@ def satisfy_output(pipeline, output_node):
 			step_node = get_node(pipeline, get_source(edge))
 			if get_kind(step_node) == 'Step':
 				#We have to execute this step
-				execute_step(pipeline, step_node)
+				execute_step(pipeline, node=step_node)
 
 
 def satisfy_outputs(pipeline, output_nodes):
@@ -293,7 +293,7 @@ def corec_requires(step, **kwargs):
 	pipeline = kwargs['pipeline']
 	tool_node = get_node(pipeline, step)
 
-	install_tool(pipeline, tool_node)
+	install_tool(pipeline, node=tool_node)
 
 @command_line
 def corec_init(**kwargs):
