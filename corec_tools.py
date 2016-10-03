@@ -12,8 +12,11 @@ defaults = {
 	'parameters_filename': 'corec_parameters.json',
 	'exit_on_non_zero_return_code' : True,
 	'pipeline_filename': 'pipeline.json',
+	'progress_filename': 'corec_progress.txt',
 
-	'parameters': {}, # Do not change 
+	# Do not change any of these
+	'parameters': {},  
+	'current_progress': '',
 }
 
 def is_parameter(node):
@@ -77,7 +80,25 @@ def command_line(f):
 		load_parameters()
 		kwargs['pipeline'] = load_pipeline()
 
-		return f(*args, **kwargs)
+		progress_filename = defaults['progress_filename']
+
+		if not os.path.isfile(progress_filename):
+			with open(progress_filename, 'w') as f:
+				pass # Just create it
+
+		with open(progress_filename) as f:
+			progress = f.read()
+
+	
+		defaults['current_progress'] = progress
+
+		ret = f(*args, **kwargs)
+
+		# Save progress
+		with open(progress_filename, 'w') as f:
+			f.write(progress)
+
+		return ret
 
 	return wrapper
 
@@ -153,7 +174,15 @@ def random_filename(prefix, name):
 	return "{}_{}_{}.sh".format(prefix, name.replace('|', '_'), str(uuid.uuid4()).split('-')[-1])
 
 def run_bash_command(command):
+
+	# Get progress
+	progress = read_progress()
+
 	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+
+	for line in iter(p.stdout.readline, ""):
+		logging.info('{} --> {} -> {}'.format(progress, command, line.replace('\n', '')))
+
 	output, error = process.communicate()
 	return_code = process.returncode
 
@@ -178,19 +207,60 @@ def execute_commands(prefix, node_with_commands, commands):
 			logging.info('Exiting.. (Fail)')
 			sys.exit(1)
 
-def execute_step(pipeline, step_node):
-	id_ = get_id(step_node)
+def read_progress():
+	progress_filename = defaults['progress_filename']
+	if not os.path.isfile(progress_filename):
+		with open(progress_filename, 'w') as f:
+			pass # Just create it
+
+	with open(progress_filename) as f:
+		p = f.read()
+
+	return f
+
+def append_progress(progress):
+	progress_filename = defaults['progress_filename']
+
+	with open(progress_filename, 'a') as f:
+		f.write(progress)	
+
+def save_progress(progress):
+	progress_filename = defaults['progress_filename']
+
+	with open(progress_filename, 'w') as f:
+		f.write(progress)
+
+def has_progress(progress_string):
+	def decorator(f):
+		def wrapper(*args, **kwargs):
+
+			progress_string = " --> {}{}".format(progress_string, get_it(kwargs['node']))
+			current_progress = read_progress()
+			append_progress(progress_string)
+			ret = f(*args, **kwargs)
+			save_progress(current_progress)
+			return ret
+		return wrapper
+	return decorator
+
+@has_progress('STEP : ')
+def execute_step(pipeline, **kwargs):
+	node = kwargs['node']
+	id_ = get_id(node)
 	logging.info('Executing step: {}'.format(id_))
 
-	commands = step_node["data"]["bash_commands"]
-	execute_commands('step', step_node, commands)
+	commands = node["data"]["bash_commands"]
+	execute_commands('step', node, commands)
 
-def install_tool(pipeline, tool_node):
-	id_ = get_id(tool_node)
+@has_progress('INSTALL : ')
+def install_tool(pipeline, **kwargs):
+	node = kwargs['node']
+	id_ = get_id(node)
+
 	logging.info('Installing tool: {}'.format(id_))
 
-	installation = tool_node["data"]["installation"]
-	execute_commands('tool', tool_node, installation)
+	installation = node["data"]["installation"]
+	execute_commands('tool', node, installation)
 
 def satisfy_output(pipeline, output_node):
 	# Get all steps that have this output_node
