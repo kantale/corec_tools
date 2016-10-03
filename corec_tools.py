@@ -214,6 +214,11 @@ def save_progress(progress):
 	with open(progress_filename, 'w') as f:
 		f.write(progress)
 
+def delete_progress(progress):
+	progress_filename = defaults['progress_filename']
+	if os.path.isfile(progress_filename):
+		os.remove(progress_filename)
+
 def has_progress(progress_string):
 	def decorator(f):
 		def wrapper(*args, **kwargs):
@@ -297,6 +302,8 @@ def corec_requires(step, **kwargs):
 
 @command_line
 def corec_init(**kwargs):
+	#Delete progress file
+	delete_progress()
 	execute_pipeline(kwargs['pipeline'])
 # ========================== COREC COMMANDS ==================
 
