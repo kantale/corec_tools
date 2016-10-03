@@ -1,0 +1,13 @@
+#! /usr/bin/env python
+
+import argparse
+from corec_tools import corec_init
+
+if __name__ == '__main__':
+
+	parser = argparse.ArgumentParser(description='corec_init')
+	args = parser.parse_args()
+	corec_init()
+
+
+	

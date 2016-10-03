@@ -1,0 +1,15 @@
+#! /usr/bin/env python
+
+import argparse
+from corec_tools import corec_requires
+
+if __name__ == '__main__':
+
+	parser = argparse.ArgumentParser(description='corec_requires')
+	parser.add_argument('step', metavar='N', type=str, help='Name of required step')
+	args = parser.parse_args()
+	step = args.step
+	corec_requires(step)
+
+
+	
