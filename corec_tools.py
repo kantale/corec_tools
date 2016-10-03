@@ -80,23 +80,7 @@ def command_line(f):
 		load_parameters()
 		kwargs['pipeline'] = load_pipeline()
 
-		progress_filename = defaults['progress_filename']
-
-		if not os.path.isfile(progress_filename):
-			with open(progress_filename, 'w') as f:
-				pass # Just create it
-
-		with open(progress_filename) as f:
-			progress = f.read()
-
-	
-		defaults['current_progress'] = progress
-
 		ret = f(*args, **kwargs)
-
-		# Save progress
-		with open(progress_filename, 'w') as f:
-			f.write(progress)
 
 		return ret
 
