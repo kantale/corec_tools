@@ -200,7 +200,7 @@ def read_progress():
 	with open(progress_filename) as f:
 		p = f.read()
 
-	return f
+	return p
 
 def append_progress(progress):
 	progress_filename = defaults['progress_filename']
