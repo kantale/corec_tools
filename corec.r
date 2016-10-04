@@ -12,7 +12,7 @@ library(rjson);
 
 corec_get <- function(parameter) {
 	json_data <- fromJSON(file="corec_parameters.json");
-	return(json_data[parameter]);
+	return(json_data[[parameter]]);
 }
 
 corec_set <- function(parameter, value) {
