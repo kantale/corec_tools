@@ -13,6 +13,7 @@ defaults = {
 	'exit_on_non_zero_return_code' : True,
 	'pipeline_filename': 'pipeline.json',
 	'progress_filename': 'corec_progress.txt',
+	'mock' : False,
 
 	# Do not change any of these
 	'parameters': {},  
@@ -48,6 +49,16 @@ def get_node(pipeline, id_):
 			if len(node_id_s) == 3 and len(id_s) == 2:
 				if id_s[0] == node_id_s[0] and id_s[1] == node_id_s[2]:
 					return node
+
+def get_outgoing_edges(pipeline, node):
+	for edge in pipeline["elements"]["edges"]:
+		if get_source(edge) == get_id(node):
+			yield edge
+
+def get_ingoing_edges(pipeline, node):
+	for edge in pipeline["elements"]["edges"]:
+		if get_target(edge) == get_id(node):
+			yield edge
 
 def load_pipeline():
 
@@ -193,6 +204,11 @@ def run_bash_command(command):
 	return return_code, output, error
 
 def execute_commands(prefix, node_with_commands, commands):
+
+	if defaults['mock']:
+		# We pretend to execute them
+		return
+
 	id_ = get_id(node_with_commands)
 	fn = random_filename(prefix, id_)
 	logging.info('Saving bash commands to {}'.format(fn))
@@ -256,6 +272,21 @@ def has_progress(progress_string):
 def execute_step(pipeline, **kwargs):
 	node = kwargs['node']
 	id_ = get_id(node)
+
+	#Perhaps this step has input parameters that are satisfied by other steps
+	for outgoing_edge in get_outgoing_edges(pipeline, node):
+		if get_kind(outgoing_edge) == 'Needs_Parameter':
+			parameter_node_id = get_target(outgoing_edge)
+			parameter_node = get_node(pipeline, parameter_node_id)
+			# Check if this parameter is set by any other tool
+			for ingoing_edge in get_ingoing_edges(pipeline, parameter_node):
+				if get_kind(ingoing_edge) == 'Sets_Outputs':
+					dependent_step_id = get_source(ingoing_edge)
+					if dependent_step_id != id_:
+						# This is a dependent step
+						dependent_step = get_node(pipeline, dependent_step_id)
+						execute_step(pipeline, node=dependent_step)
+
 	logging.info('Executing step: {}'.format(id_))
 
 	commands = node["data"]["bash_commands"]
@@ -282,6 +313,7 @@ def satisfy_output(pipeline, output_node):
 		if edge_target == get_id(output_node):
 			step_node = get_node(pipeline, get_source(edge))
 			if get_kind(step_node) == 'Step':
+				# this edge is a Step and has an unsatisfied output
 				#We have to execute this step
 				execute_step(pipeline, node=step_node)
 
@@ -323,6 +355,8 @@ def corec_requires(step, **kwargs):
 @command_line
 def corec_init(**kwargs):
 	#Delete progress file
+	if 'mock' in kwargs:
+		defaults['mock'] = kwargs['mock']
 	delete_progress()
 	execute_pipeline(kwargs['pipeline'])
 

@@ -6,8 +6,12 @@ from corec_tools import corec_init
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser(description='corec_init')
+	parser.add_argument('--mock', required=False, action='store_true', help="Only print executing steps")
 	args = parser.parse_args()
-	corec_init()
+	
+	mock = args.mock
+
+	corec_init(mock=mock)
 
 
 	
