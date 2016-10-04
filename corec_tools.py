@@ -214,7 +214,7 @@ def save_progress(progress):
 	with open(progress_filename, 'w') as f:
 		f.write(progress)
 
-def delete_progress(progress):
+def delete_progress():
 	progress_filename = defaults['progress_filename']
 	if os.path.isfile(progress_filename):
 		os.remove(progress_filename)
