@@ -356,7 +356,14 @@ def corec_requires(step, **kwargs):
 def corec_init(**kwargs):
 	#Delete progress file
 	if 'mock' in kwargs:
+		logging.info('Running in "mocking" mode (nothing will actually happen)')
 		defaults['mock'] = kwargs['mock']
+
+	if 'ignore_return_code' in kwargs:
+		if kwargs['ignore_return_code']:
+			logging.info('Ignoring non-positive return codes')
+			defaults['exit_on_non_zero_return_code'] = False
+
 	delete_progress()
 	execute_pipeline(kwargs['pipeline'])
 
