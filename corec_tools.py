@@ -74,7 +74,14 @@ def load_parameters():
 
 def save_parameter(parameter, value):
 	load_parameters()
-	defaults['parameters'][parameter] = value
+	if merge:
+		if not value in defaults['parameters']:
+			logging.warning('Value: {} is NOT in the parameters. Cannot merge.'.format{value})
+		else:
+			defaults['parameters'][parameter] = defaults['parameters'][value]
+			
+	else:
+		defaults['parameters'][parameter] = value
 	save_parameters_file()
 
 
@@ -320,8 +327,8 @@ def corec_init(**kwargs):
 	execute_pipeline(kwargs['pipeline'])
 
 @command_line
-def corec_set(parameter, value, **kwargs):
-	save_parameter(parameter, value)
+def corec_set(parameter, value, merge, **kwargs):
+	save_parameter(parameter, value, merge)
 
 # ========================== COREC COMMANDS ==================
 

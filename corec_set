@@ -6,12 +6,17 @@ from corec_tools import corec_set
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser(description='corec_set')
+	parser.add_argument('--merge', required=False, action='store_true', help="Merge input and output variables")
 	parser.add_argument('parameter', type=str, help='Name of parameter')
 	parser.add_argument('value', type=str, help="Value of parameter")
 	args = parser.parse_args()
+	merge = args.merge
 	parameter = args.parameter
 	value = args.value
-	corec_set(parameter, value)
+
+	print merge, parameter, value
+
+	corec_set(parameter, value, merge)
 
 
 	
