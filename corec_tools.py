@@ -50,6 +50,10 @@ def get_node(pipeline, id_):
 					return node
 
 def load_pipeline():
+
+	if not os.path.isfile(defaults["pipeline_filename"]):
+		return False
+
 	with open(defaults["pipeline_filename"]) as f:
 		pipeline = json.load(f)
 
@@ -67,6 +71,12 @@ def load_parameters():
 		parameters = json.load(f)
 
 	defaults['parameters'] = parameters
+
+def save_parameter(parameter, value):
+	load_parameters()
+	defaults['parameters'][parameter] = value
+	save_parameters_file()
+
 
 def set_up_environment():
 	# dir_path = os.path.dirname(os.path.realpath(__file__)) 
@@ -134,6 +144,10 @@ def get_notset_outputs(pipeline):
 
 	return ret
 
+def save_parameters_file():
+	with open(defaults['parameters_filename'], 'w') as f:
+		f.write(json.dumps(defaults['parameters'], indent=4) + '\n')
+
 
 def input_parameters(parameters):
 
@@ -149,8 +163,7 @@ def input_parameters(parameters):
 			p_value = raw_input(request_str)
 			defaults['parameters'][p_id] = p_value
 
-	with open(defaults['parameters_filename'], 'w') as f:
-		f.write(json.dumps(defaults['parameters'], indent=4) + '\n')
+	save_parameters_file()
 
 
 def random_filename(prefix, name):
@@ -305,6 +318,11 @@ def corec_init(**kwargs):
 	#Delete progress file
 	delete_progress()
 	execute_pipeline(kwargs['pipeline'])
+
+@command_line
+def corec_set(parameter, value, **kwargs):
+	save_parameter(parameter, value)
+
 # ========================== COREC COMMANDS ==================
 
 	
