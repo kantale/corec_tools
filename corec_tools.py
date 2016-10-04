@@ -76,10 +76,10 @@ def save_parameter(parameter, value):
 	load_parameters()
 	if merge:
 		if not value in defaults['parameters']:
-			logging.warning('Value: {} is NOT in the parameters. Cannot merge.'.format{value})
+			logging.warning('Value: {} is NOT in the parameters. Cannot merge.'.format(value))
 		else:
 			defaults['parameters'][parameter] = defaults['parameters'][value]
-			
+
 	else:
 		defaults['parameters'][parameter] = value
 	save_parameters_file()
