@@ -83,7 +83,7 @@ def load_parameters():
 
 	defaults['parameters'] = parameters
 
-def save_parameter(parameter, value):
+def save_parameter(parameter, value, merge):
 	load_parameters()
 	if merge:
 		if not value in defaults['parameters']:
