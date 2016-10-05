@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser(description='corec_init')
 	parser.add_argument('--mock', required=False, action='store_true', help="Only print executing steps")
-	parser.add_argument('--ignore_return_code', require=False, action='store_true', help="Ignore non zero return codes")
+	parser.add_argument('--ignore_return_code', required=False, action='store_true', help="Ignore non zero return codes")
 	args = parser.parse_args()
 	
 	mock = args.mock

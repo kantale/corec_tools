@@ -1,0 +1,4 @@
+
+# This is a shortcut
+corec_set --merge $1 $2
+
