@@ -349,7 +349,7 @@ def execute_cy_pipeline(pipeline):
 	output_nodes = get_notset_outputs(pipeline)
 	satisfy_outputs(pipeline, output_nodes)
 
-	show_results()
+	show_results(output_nodes)
 
 
 def execute_pipeline(pipeline):
