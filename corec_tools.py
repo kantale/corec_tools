@@ -328,6 +328,17 @@ def satisfy_outputs(pipeline, output_nodes):
 		logging.info('Satisfying output node {}/{}: {}'.format(output_node_index+1, total, get_id(output_node)))
 		satisfy_output(pipeline, output_node)
 
+def show_results(output_nodes):
+
+	for output_node in output_nodes:
+		output_node_id = get_id(output_node)
+		logging.info("RESULTS")
+		logging.info("=======")
+		if defaults['mock']:
+			logging.info('     {} = {}'.format(output_node_id, '<MOCKING MODE>'))
+		else:
+			logging.info('     {} = {}'.format(output_node_id, defaults['parameters'][output_node_id]))
+
 def execute_cy_pipeline(pipeline):
 	
 	elements = pipeline['elements']
@@ -337,6 +348,8 @@ def execute_cy_pipeline(pipeline):
 	input_parameters(notset_parameters)
 	output_nodes = get_notset_outputs(pipeline)
 	satisfy_outputs(pipeline, output_nodes)
+
+	show_results()
 
 
 def execute_pipeline(pipeline):
