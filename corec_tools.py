@@ -86,10 +86,12 @@ def load_parameters():
 def save_parameter(parameter, value, merge):
 	load_parameters()
 	if merge:
-		if not value in defaults['parameters']:
-			logging.warning('Value: {} is NOT in the parameters. Cannot merge.'.format(value))
-		else:
-			defaults['parameters'][parameter] = defaults['parameters'][value]
+		defaults['parameters'][value] = defaults['parameters'][parameter]
+#		if not value in defaults['parameters']:
+#			
+#			logging.warning('Value: {} is NOT in the parameters. Cannot merge.'.format(value))
+#		else:
+#			defaults['parameters'][parameter] = defaults['parameters'][value]
 
 	else:
 		defaults['parameters'][parameter] = value
