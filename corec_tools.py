@@ -20,6 +20,9 @@ defaults = {
 	'current_progress': '',
 }
 
+class CORECException(Exception):
+	pass
+
 def is_parameter(node):
 	return node['data']['kind'] == 'Parameter'
 
@@ -86,12 +89,10 @@ def load_parameters():
 def save_parameter(parameter, value, merge):
 	load_parameters()
 	if merge:
+		if not parameter in defaults['parameters']:
+			raise CORECException('Error in merge: Parameter {} does not exist'.format(parameter))
+		
 		defaults['parameters'][value] = defaults['parameters'][parameter]
-#		if not value in defaults['parameters']:
-#			
-#			logging.warning('Value: {} is NOT in the parameters. Cannot merge.'.format(value))
-#		else:
-#			defaults['parameters'][parameter] = defaults['parameters'][value]
 
 	else:
 		defaults['parameters'][parameter] = value
