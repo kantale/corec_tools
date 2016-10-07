@@ -330,6 +330,7 @@ def satisfy_outputs(pipeline, output_nodes):
 
 def show_results(output_nodes):
 
+	load_parameters()
 	for output_node in output_nodes:
 		output_node_id = get_id(output_node)
 		logging.info("RESULTS")
@@ -337,7 +338,10 @@ def show_results(output_nodes):
 		if defaults['mock']:
 			logging.info('     {} = {}'.format(output_node_id, '<MOCKING MODE>'))
 		else:
-			logging.info('     {} = {}'.format(output_node_id, defaults['parameters'][output_node_id]))
+			if output_node_id in defaults['parameters']:
+				logging.info('     {} = {}'.format(output_node_id, defaults['parameters'][output_node_id]))
+			else:
+				logging.info('     {} = {}'.format(output_node_id, '<NOT SET>'))
 
 def execute_cy_pipeline(pipeline):
 	
