@@ -1,0 +1,17 @@
+#! /usr/bin/env python
+
+import argparse
+from corec_tools import corec_get
+
+if __name__ == '__main__':
+
+	parser = argparse.ArgumentParser(description='corec_set')
+	parser.add_argument('parameter', type=str, help='Name of parameter')
+	args = parser.parse_args()
+
+	parameter = args.parameter
+
+	value = corec_get(parameter)
+
+
+	

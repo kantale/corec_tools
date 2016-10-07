@@ -371,6 +371,11 @@ def corec_init(**kwargs):
 def corec_set(parameter, value, merge, **kwargs):
 	save_parameter(parameter, value, merge)
 
+@command_line
+def corec_get(parameter, **kwargs):
+	load_parameters()
+	print defaults['parameters'][parameter]
+
 # ========================== COREC COMMANDS ==================
 
 	
