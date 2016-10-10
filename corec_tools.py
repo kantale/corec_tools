@@ -376,8 +376,9 @@ def corec_requires(step, **kwargs):
 def corec_init(**kwargs):
 	#Delete progress file
 	if 'mock' in kwargs:
-		logging.info('Running in "mocking" mode (nothing will actually happen)')
 		defaults['mock'] = kwargs['mock']
+		if defaults['mock']:
+			logging.info('Running in "mocking" mode (nothing will actually happen)')
 
 	if 'ignore_return_code' in kwargs:
 		if kwargs['ignore_return_code']:
