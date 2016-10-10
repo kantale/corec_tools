@@ -223,7 +223,7 @@ def execute_commands(prefix, node_with_commands, commands):
 	command = 'bash {}'.format(fn)
 	logging.info('Running: {}'.format(command))
 	return_code, output, error = run_bash_command(command)
-	logging.info('Return Code: {}'.format(return_code))
+	logging.info('Return Code of command {} --> {}'.format(command, return_code))
 	if return_code:
 		logging.warning('RETURN CODE {} is not zero..'.format(return_code))
 		if defaults['exit_on_non_zero_return_code']:
