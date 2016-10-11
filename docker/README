@@ -1,0 +1,10 @@
+
+apt-get -y install sudo wget 
+
+docker build -t corec_docker .
+
+docker run -i -t corec_docker /bin/bash 
+
+docker ps
+docker cp /Users/alexandroskanterakis/Downloads/runme.sh 852493f99a43:/root/runme.sh 
+
