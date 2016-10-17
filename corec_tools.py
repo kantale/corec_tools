@@ -326,16 +326,22 @@ def satisfy_outputs(pipeline, output_nodes):
 	total = len(output_nodes)
 	logging.info('Total unsatisfied output nodes: {}'.format(total))
 	for output_node_index, output_node in enumerate(output_nodes):
-		logging.info('Satisfying output node {}/{}: {}'.format(output_node_index+1, total, get_id(output_node)))
-		satisfy_output(pipeline, output_node)
+		load_parameters()
+		if not get_id(output_node) in defaults['parameters']:
+			logging.info('Satisfying output node {}/{}: {}'.format(output_node_index+1, total, get_id(output_node)))
+			satisfy_output(pipeline, output_node)
+		else:
+			logging.info('Output node {}/{}: {} has already been satisfied'.format(output_node_index+1, total, get_id(output_node)))
+
 
 def show_results(output_nodes):
 
 	load_parameters()
+	logging.info("RESULTS")
+	logging.info("=======")
+
 	for output_node in output_nodes:
 		output_node_id = get_id(output_node)
-		logging.info("RESULTS")
-		logging.info("=======")
 		if defaults['mock']:
 			logging.info('     {} = {}'.format(output_node_id, '<MOCKING MODE>'))
 		else:
@@ -343,6 +349,7 @@ def show_results(output_nodes):
 				logging.info('     {} = {}'.format(output_node_id, defaults['parameters'][output_node_id]))
 			else:
 				logging.info('     {} = {}'.format(output_node_id, '<NOT SET>'))
+	logging.info('FINISH')
 
 def execute_cy_pipeline(pipeline):
 	
