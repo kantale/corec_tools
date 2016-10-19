@@ -246,7 +246,7 @@ def set_lock_value(lock_name, value):
 	locks[lock_name] = value
 
 	with open(locks_filename, 'w') as f:
-		json.dump(locks, indent=4)
+		json.dump(locks, f, indent=4)
 
 def set_lock(lock_name):
 	set_lock_value(lock_name, True)
