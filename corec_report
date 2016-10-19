@@ -1,0 +1,17 @@
+#! /usr/bin/env python
+
+import argparse
+from corec_tools import corec_report
+
+if __name__ == '__main__':
+
+	parser = argparse.ArgumentParser(description='corec_report')
+	parser.add_argument('content', type=str, help='filename or string to be included in report')
+	args = parser.parse_args()
+
+	content = args.content
+
+	corec_report(content)
+
+
+	
