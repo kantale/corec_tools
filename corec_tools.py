@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 defaults = {
 	'parameters_filename': 'corec_parameters.json',
+	'locks_filename': 'corec_locks.json',
 	'exit_on_non_zero_return_code' : True,
 	'pipeline_filename': 'pipeline.json',
 	'progress_filename': 'corec_progress.txt',
@@ -230,6 +231,58 @@ def execute_commands(prefix, node_with_commands, commands):
 			logging.info('Exiting.. (Fail)')
 			sys.exit(1)
 
+# MANAGE LOCKS
+
+
+def set_lock_value(lock_name, value):
+	locks_filename = defaults['locks_filename']
+
+	if os.path.isfile(locks_filename):
+		with open(locks_filename) as f:
+			locks = json.load(f)
+	else:
+		locks = {}
+
+	locks[lock_name] = value
+
+	with open(locks_filename, 'w') as f:
+		json.dump(locks, indent=4)
+
+def set_lock(lock_name):
+	set_lock_value(lock_name, True)
+
+def unset_lock(lock_name):
+	set_lock_value(lock_name, False)
+
+def get_lock_value(lock_name):
+	locks_filename = defaults['locks_filename']
+
+	if os.path.isfile(locks_filename):
+		with open(locks_filename) as f:
+			locks = json.load(f)
+	else:
+		locks = {}
+
+	if lock_name in locks:
+		return locks[lock_name]
+
+	return False
+
+def get_all_locks():
+	locks_filename = defaults['locks_filename']
+
+	if os.path.isfile(locks_filename):
+		with open(locks_filename) as f:
+			locks = json.load(f)
+	else:
+		return []
+
+	ret = [lock_name for lock_name, lock_value in locks.iteritems() if lock_value]
+	return ret
+
+
+# END OF MANAGE LOCKS
+
 def read_progress():
 	progress_filename = defaults['progress_filename']
 	if not os.path.isfile(progress_filename):
@@ -328,8 +381,15 @@ def satisfy_outputs(pipeline, output_nodes):
 	for output_node_index, output_node in enumerate(output_nodes):
 		load_parameters()
 		if not get_id(output_node) in defaults['parameters']:
-			logging.info('Satisfying output node {}/{}: {}'.format(output_node_index+1, total, get_id(output_node)))
-			satisfy_output(pipeline, output_node)
+			
+			while True: # Repeatidly try to satisfy this step until there is not lock
+				logging.info('Satisfying output node {}/{}: {}'.format(output_node_index+1, total, get_id(output_node)))
+				satisfy_output(pipeline, output_node)
+				locks = get_all_locks()
+				if locks:
+					logging.info('Found these locks: {}. Trying to satisfy the output again'.format(str(locks)))
+				else:
+					break
 		else:
 			logging.info('Output node {}/{}: {} has already been satisfied'.format(output_node_index+1, total, get_id(output_node)))
 
@@ -402,7 +462,19 @@ def corec_set(parameter, value, merge, **kwargs):
 @command_line
 def corec_get(parameter, **kwargs):
 	load_parameters()
-	print defaults['parameters'][parameter]
+	if parameter in defaults['parameters']:
+		print defaults['parameters'][parameter]
+	else:
+		print 'COREC_UNSET'
+
+@command_line
+def corec_lock(lock_name):
+	set_lock(lock_name)
+
+@command_line
+def corec_unlock(lock_name):
+	unset_lock(lock_name)
+
 
 # ========================== COREC COMMANDS ==================
 
