@@ -4,7 +4,7 @@
 rjson_exists <- require('rjson')
 
 if (! rjson_exists) {
-	print ('rjson does not exist');
+	print ('rjson does not exist. Installing it..');
 	install.packages("rjson", repos='http://cran.us.r-project.org');
 }
 
@@ -18,8 +18,23 @@ corec_get <- function(parameter) {
 corec_set <- function(parameter, value) {
 	json_data <- fromJSON(file="corec_parameters.json");
 	json_data[parameter] <- value;
-	json_str <- toJSON(json_data);
 
+	json_str <- toJSON(json_data);
 	write(json_str, 'corec_parameters.json');
 }
 
+corec_lock <- function(lock) {
+	json_data <- fromJSON(file="corec_locks.json");
+	json_data[lock] <- TRUE;
+
+	json_str <- toJSON(json_data);
+	write(json_str, 'corec_parameters.json');
+}
+
+corec_unlock <- function(lock) {
+	json_data <- fromJSON(file="corec_locks.json");
+	json_data[lock] <- FALSE;
+
+	json_str <- toJSON(json_data);
+	write(json_str, 'corec_parameters.json');
+}

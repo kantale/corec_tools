@@ -233,6 +233,10 @@ def execute_commands(prefix, node_with_commands, commands):
 
 # MANAGE LOCKS
 
+def reset_locks():
+	#Reset locks
+	with open(defaults['locks_filename'], 'w') as f:
+		json.dump({}, f, indent=4)
 
 def set_lock_value(lock_name, value):
 	locks_filename = defaults['locks_filename']
@@ -452,7 +456,9 @@ def corec_init(**kwargs):
 			logging.info('Ignoring non-positive return codes')
 			defaults['exit_on_non_zero_return_code'] = False
 
+	reset_locks()
 	delete_progress()
+
 	execute_pipeline(kwargs['pipeline'])
 
 @command_line
@@ -478,5 +484,5 @@ def corec_unlock(lock_name, **kwargs):
 
 # ========================== COREC COMMANDS ==================
 
-	
+
 

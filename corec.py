@@ -25,4 +25,27 @@ def corec_get(parameter):
 
 	return None
 
+def corec_lock(lock):
+	locks_fn = "corec_locks.json"
+
+	with open(locks_fn) as f:
+		locks = json.load(f)
+
+	locks[lock] = True
+
+	with open(locks_fn, 'w') as f:
+		json.dump(locks, f, indent=4)
+
+def corec_unlock(lock):
+        locks_fn = "corec_locks.json"
+
+        with open(locks_fn) as f:
+                locks = json.load(f)
+
+        locks[lock] = False
+
+        with open(locks_fn, 'w') as f:
+                json.dump(locks, f, indent=4)
+
+
 
