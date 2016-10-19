@@ -328,7 +328,7 @@ def report_init():
 
 	mkdir_p(corec_report_directory)
 	logging.info('Created report directory: {}'.format(corec_report_directory))
-	save_parameter('corec_report_dir', corec_report_directory)
+	save_parameter('corec_report_dir', corec_report_directory, False)
 
 	init_content = '''
 <!DOCTYPE html>
@@ -606,6 +606,10 @@ def corec_lock(lock_name, **kwargs):
 @command_line
 def corec_unlock(lock_name, **kwargs):
 	unset_lock(lock_name)
+
+@command_line
+def corec_report(content, **kwargs):
+	report_add(content)
 
 
 # ========================== COREC COMMANDS ==================
