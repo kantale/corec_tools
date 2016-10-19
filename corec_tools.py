@@ -3,8 +3,11 @@ import os
 import sys
 import json
 import uuid
+import errno  
 import logging
 import subprocess
+
+from shutil import copyfile
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -15,6 +18,13 @@ defaults = {
 	'pipeline_filename': 'pipeline.json',
 	'progress_filename': 'corec_progress.txt',
 	'mock' : False,
+	'report_embed': [
+		(['png', 'jpg', 'jpeg'], lambda x : '<img src="{}">'.format(x)),
+		[('pdf'), lambda x: '<embed src="{}" width="500" height="375" type="application/pdf">'.format(x)],
+		[('html'), lambda x: x],
+	],
+	'report_text': lambda x : '<p><code>{}</code></p>'.format(cgi.escape(x).encode('ascii', 'xmlcharrefreplace')), # http://stackoverflow.com/questions/1061697/whats-the-easiest-way-to-escape-html-in-python DEPRECATION NOTE
+	'report_default': lambda x : '<p>{}</p>'.format(x),
 
 	# Do not change any of these
 	'parameters': {},  
@@ -23,6 +33,21 @@ defaults = {
 
 class CORECException(Exception):
 	pass
+
+def get_uuid():
+	return str(uuid.uuid4()).split('-')[-1]
+
+def mkdir_p(path):
+	'''
+	http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python
+	'''
+	try:
+		os.makedirs(path)
+	except OSError as exc:  # Python >2.5
+		if exc.errno == errno.EEXIST and os.path.isdir(path):
+			pass
+		else:
+			raise
 
 def is_parameter(node):
 	return node['data']['kind'] == 'Parameter'
@@ -190,7 +215,7 @@ def input_parameters(parameters):
 
 def random_filename(prefix, name):
 
-	return "{}_{}_{}.sh".format(prefix, name.replace('|', '_'), str(uuid.uuid4()).split('-')[-1])
+	return "{}_{}_{}.sh".format(prefix, name.replace('|', '_'), get_uuid())
 
 def run_bash_command(command):
 
@@ -286,6 +311,106 @@ def get_all_locks():
 
 
 # END OF MANAGE LOCKS
+
+##################################################
+
+# COREC REPORT
+
+def report_html_fn():
+	load_parameters()
+
+	return os.path.join(defaults['parameters']['corec_report_dir'], 'index.html')
+
+def report_init():
+
+	#Create corec report directory
+	corec_report_directory = "corec_report_{}".format(get_uuid())
+
+	mkdir_p(corec_report_directory)
+	logging.info('Created report directory: {}'.format(corec_report_directory))
+	save_parameter('corec_report_dir', corec_report_directory)
+
+	init_content = '''
+<!DOCTYPE html>
+<html>
+<body>
+{content}
+</body>
+</html>
+'''
+
+	with open(report_html_fn(), 'w') as f:
+		f.write(init_content)
+
+def report_finalize():
+
+	html_filename = report_html_fn()
+	with open(html_filename) as f:
+		html_filename_content = f.read()
+
+	html_filename_new_content = html_filename_content.format(content='')
+
+	with open(html_filename, 'w') as f:
+		f.write(html_filename_new_content)
+
+	logging.info('HTML Report is available at: {}'.format(html_filename))
+
+def report_add(content):
+	'''
+	content is always string
+	'''
+
+	load_parameters()
+	corec_report_directory = defaults['parameters']['corec_report_dir']
+
+	assert type(content).__name__ in ['unicode', 'str']
+
+	html_to_add = ''
+
+	if os.path.isfile(content):
+		'''
+		There is a file with this name
+		Get the extension
+		'''
+		dest = os.path.join(corec_report_directory, content)
+
+		#Copy to report directory
+		copyfile(content, dest)
+
+		extension = os.path.splitext('content')[1].lower()
+		filename = os.path.split()[1]
+
+		for formats, html_function in defaults['report_embed']:
+			if extension in formats:
+				html_to_add = html_function()
+
+		if not html_to_add:
+			#Trying to embed the whole file as txt file
+			with open(content) as f:
+				text = f.read()
+
+			html_to_add = '<p>File: <a href="{}">{}</a>:</p>'.format(content, content)
+			html_to_add = defaults['report_text'](text)
+
+		logging.info('Added in report file: {}'.format(content))
+
+	else:
+		html_to_add = defaults['report_default'](content)
+		logging.info('Added in report string: {}'.format(content))
+
+	html_filename = report_html_fn()
+	with open(html_filename) as f:
+		html_filename_content = f.read()
+
+	html_filename_new_content = html_filename_content.format(content=html_to_add + '\n{content}')
+
+	with open(html_filename, 'w') as f:
+		f.write(html_filename_new_content)
+
+
+# END OF COREC REPORT 
+
+##################################################
 
 def read_progress():
 	progress_filename = defaults['progress_filename']
@@ -458,8 +583,9 @@ def corec_init(**kwargs):
 
 	reset_locks()
 	delete_progress()
-
+	report_init()
 	execute_pipeline(kwargs['pipeline'])
+	report_finalize()
 
 @command_line
 def corec_set(parameter, value, merge, **kwargs):
