@@ -468,11 +468,11 @@ def corec_get(parameter, **kwargs):
 		print 'COREC_UNSET'
 
 @command_line
-def corec_lock(lock_name):
+def corec_lock(lock_name, **kwargs):
 	set_lock(lock_name)
 
 @command_line
-def corec_unlock(lock_name):
+def corec_unlock(lock_name, **kwargs):
 	unset_lock(lock_name)
 
 
