@@ -22,8 +22,8 @@ defaults = {
 	'mock' : False,
 	'report_embed': [
 		(['png', 'jpg', 'jpeg'], lambda x : '<img src="{}">'.format(x)),
-		[('pdf'), lambda x: '<embed src="{}" width="500" height="375" type="application/pdf">'.format(x)],
-		[('html'), lambda x: x],
+		[['pdf'], lambda x: '<embed src="{}" width="500" height="375" type="application/pdf">'.format(x)],
+		[['html'], lambda x: x],
 	],
 	'report_text': lambda x : '<p><code>{}</code></p>'.format(cgi.escape(x).encode('ascii', 'xmlcharrefreplace')), # http://stackoverflow.com/questions/1061697/whats-the-easiest-way-to-escape-html-in-python DEPRECATION NOTE
 	'report_default': lambda x : '<p>{}</p>'.format(x),
@@ -384,6 +384,8 @@ def report_add(content):
 
 		extension = os.path.splitext(content)[1].lower()
 		filename = os.path.split(content)[1]
+
+		logging.info('Reporting file: {} with extension: {}'.format(content, extension))
 
 		for formats, html_function in defaults['report_embed']:
 			if extension in formats:
