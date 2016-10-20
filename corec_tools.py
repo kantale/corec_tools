@@ -8,7 +8,8 @@ import uuid
 import errno 
 import logging
 import tarfile
-import datetime 
+import datetime
+import platform 
 import subprocess
 
 from shutil import copyfile
@@ -582,6 +583,17 @@ def execute_cy_pipeline(pipeline):
 	elements = pipeline['elements']
 	nodes = elements['nodes']
 
+	# Log the name of the root pipeline
+	for node in nodes:
+		if "kind" in node["data"]:
+			if node["data"]["kind"] == 'Pipeline':
+				if not 'parent' in node["data"]:
+					# This is a pipeline without any parent. It should be the root. Report it
+					log_message = 'Executing root pipeline node: {}'.format(node["data"]["label"])
+					logging.info(log_message)
+					report_add(log_message)
+					break
+
 	notset_parameters = get_notset_parameters(pipeline)
 	input_parameters(notset_parameters)
 	output_nodes = get_notset_outputs(pipeline)
@@ -621,6 +633,10 @@ def corec_init(**kwargs):
 	reset_locks()
 	delete_progress()
 	report_init()
+	uname = ' '.join(platform.uname())
+	uname_log = 'Platform details: {}'.format(uname)
+	logging.info(uname_log)
+	report_add(uname_log)
 	init_start = datetime.datetime.now()
 	execute_pipeline(kwargs['pipeline'])
 	init_finish = datetime.datetime.now()
