@@ -394,6 +394,14 @@ def report_add(content):
 		dest = os.path.join(corec_report_directory, content)
 
 		#Copy to report directory
+		if os.path.isfile(dest):
+			#The file already exists. Change the destination
+			new_dest_f, new_dest_e = os.path.splitext(dest)
+			new_dest = new_dest_f + "_" + get_uuid() + new_dest_e
+			dest = new_dest
+
+
+		content = os.path.split(dest)[1]
 		copyfile(content, dest)
 
 		extension = os.path.splitext(content)[1].lower().replace('.', '')
