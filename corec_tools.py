@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+import time
 import uuid
 import errno  
 import logging
@@ -33,6 +34,10 @@ defaults = {
 
 class CORECException(Exception):
 	pass
+
+def now():
+	return time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
+
 
 def get_uuid():
 	return str(uuid.uuid4()).split('-')[-1]
@@ -330,8 +335,7 @@ def report_init():
 	logging.info('Created report directory: {}'.format(corec_report_directory))
 	save_parameter('corec_report_dir', corec_report_directory, False)
 
-	init_content = '''
-<!DOCTYPE html>
+	init_content = '''<!DOCTYPE html>
 <html>
 <body>
 {content}
@@ -377,8 +381,8 @@ def report_add(content):
 		#Copy to report directory
 		copyfile(content, dest)
 
-		extension = os.path.splitext('content')[1].lower()
-		filename = os.path.split()[1]
+		extension = os.path.splitext(content)[1].lower()
+		filename = os.path.split(content)[1]
 
 		for formats, html_function in defaults['report_embed']:
 			if extension in formats:
