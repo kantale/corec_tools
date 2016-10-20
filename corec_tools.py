@@ -7,6 +7,7 @@ import time
 import uuid
 import errno  
 import logging
+import tarfile
 import subprocess
 
 from shutil import copyfile
@@ -54,6 +55,10 @@ def mkdir_p(path):
 			pass
 		else:
 			raise
+
+def make_tarfile(output_filename, source_dir):
+    with tarfile.open(output_filename, "w:gz") as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))
 
 def is_parameter(node):
 	return node['data']['kind'] == 'Parameter'
@@ -358,7 +363,11 @@ def report_finalize():
 	with open(html_filename, 'w') as f:
 		f.write(html_filename_new_content)
 
+	# Make a tarfile
+	make_tarfile("corec_report.tar.gz", defaults['corec_report_dir'])
 	logging.info('HTML Report is available at: {}'.format(html_filename))
+	logging.info('Compressed report with supporting files is available at: corec_report.tar.gz')
+
 
 def report_add(content):
 	'''
