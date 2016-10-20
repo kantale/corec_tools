@@ -25,7 +25,7 @@ defaults = {
 		[['pdf'], lambda x: '<embed src="{}" width="500" height="375" type="application/pdf">'.format(x)],
 		[['html'], lambda x: x],
 	],
-	'report_text': lambda x : '<p><code>{}</code></p>'.format(cgi.escape(x).encode('ascii', 'xmlcharrefreplace')), # http://stackoverflow.com/questions/1061697/whats-the-easiest-way-to-escape-html-in-python DEPRECATION NOTE
+	'report_text': lambda x : '<p><pre>{}</pre></p>'.format(cgi.escape(x).encode('ascii', 'xmlcharrefreplace')), # http://stackoverflow.com/questions/1061697/whats-the-easiest-way-to-escape-html-in-python DEPRECATION NOTE
 	'report_default': lambda x : '<p>{}</p>'.format(x),
 
 	# Do not change any of these
