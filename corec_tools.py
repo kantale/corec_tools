@@ -364,7 +364,7 @@ def report_finalize():
 		f.write(html_filename_new_content)
 
 	# Make a tarfile
-	make_tarfile("corec_report.tar.gz", defaults['corec_report_dir'])
+	make_tarfile("corec_report.tar.gz", defaults['parameters']['corec_report_dir'])
 	logging.info('HTML Report is available at: {}'.format(html_filename))
 	logging.info('Compressed report with supporting files is available at: corec_report.tar.gz')
 
