@@ -389,7 +389,7 @@ def report_add(content):
 
 		for formats, html_function in defaults['report_embed']:
 			if extension in formats:
-				html_to_add = html_function()
+				html_to_add = html_function(content)
 
 		if not html_to_add:
 			#Trying to embed the whole file as txt file
