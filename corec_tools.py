@@ -398,11 +398,11 @@ def report_add(content):
 			#The file already exists. Change the destination
 			new_dest_f, new_dest_e = os.path.splitext(dest)
 			new_dest = new_dest_f + "_" + get_uuid() + new_dest_e
-			dest = new_dest
+			copyfile(content, new_dest)
+			content = os.path.split(new_dest)[1]
+		else:
+			copyfile(content, dest)
 
-
-		content = os.path.split(dest)[1]
-		copyfile(content, dest)
 
 		extension = os.path.splitext(content)[1].lower().replace('.', '')
 		filename = os.path.split(content)[1]
