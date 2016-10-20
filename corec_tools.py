@@ -382,7 +382,7 @@ def report_add(content):
 		#Copy to report directory
 		copyfile(content, dest)
 
-		extension = os.path.splitext(content)[1].lower()
+		extension = os.path.splitext(content)[1].lower().replace('.', '')
 		filename = os.path.split(content)[1]
 
 		logging.info('Reporting file: {} with extension: {}'.format(content, extension))
