@@ -563,19 +563,23 @@ def satisfy_outputs(pipeline, output_nodes):
 
 def show_results(output_nodes):
 
+	def local_log(message):
+		logging.info(message)
+		report_add(message)
+
 	load_parameters()
-	logging.info("RESULTS")
-	logging.info("=======")
+	local_log("RESULTS")
+	local_log("=======")
 
 	for output_node in output_nodes:
 		output_node_id = get_id(output_node)
 		if defaults['mock']:
-			logging.info('     {} = {}'.format(output_node_id, '<MOCKING MODE>'))
+			local_log('     {} = {}'.format(output_node_id, '<MOCKING MODE>'))
 		else:
 			if output_node_id in defaults['parameters']:
-				logging.info('     {} = {}'.format(output_node_id, defaults['parameters'][output_node_id]))
+				local_log('     {} = {}'.format(output_node_id, defaults['parameters'][output_node_id]))
 			else:
-				logging.info('     {} = {}'.format(output_node_id, '<NOT SET>'))
+				local_log('     {} = {}'.format(output_node_id, '<NOT SET>'))
 	logging.info('FINISH')
 
 def execute_cy_pipeline(pipeline):
