@@ -5,9 +5,10 @@ import sys
 import json
 import time
 import uuid
-import errno  
+import errno 
 import logging
 import tarfile
+import datetime 
 import subprocess
 
 from shutil import copyfile
@@ -38,8 +39,11 @@ class CORECException(Exception):
 	pass
 
 def now():
-	return time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
+	return time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime())
 
+def time_difference(start, finish):
+	# Use with datetime.datetime.now()
+	return str(start-finish)
 
 def get_uuid():
 	return str(uuid.uuid4()).split('-')[-1]
@@ -491,7 +495,12 @@ def execute_step(pipeline, **kwargs):
 	logging.info('Executing step: {}'.format(id_))
 
 	commands = node["data"]["bash_commands"]
+	step_start = datetime.datetime.now()
 	execute_commands('step', node, commands)
+	step_finish = datetime.datetime.now()
+	step_log = 'Step {} finished. Time taken: {}'.format(id_, time_difference(step_start, step_finish))
+	logging.info(step_log)
+	report_add(step_log)
 
 @has_progress('INSTALL : ')
 def install_tool(pipeline, **kwargs):
@@ -501,7 +510,13 @@ def install_tool(pipeline, **kwargs):
 	logging.info('Installing tool: {}'.format(id_))
 
 	installation = node["data"]["installation"]
+	tool_start = datetime.datetime.now()
 	execute_commands('tool', node, installation)
+	tool_finish = datetime.datetime.now()
+	tool_log = 'Tool {} installed. Time taken: {}'.format(id_, time_difference(tool_start, tool_finish))
+	logging.info(tool_log)
+	report_add(tool_log)
+
 
 def satisfy_output(pipeline, output_node):
 	# Get all steps that have this output_node
@@ -529,7 +544,13 @@ def satisfy_outputs(pipeline, output_nodes):
 			
 			while True: # Repeatidly try to satisfy this step until there is not lock
 				logging.info('Satisfying output node {}/{}: {}'.format(output_node_index+1, total, get_id(output_node)))
+				satisfy_output_start = datetime.datetime.now()
 				satisfy_output(pipeline, output_node)
+				satisfy_output_finish = datetime.datetime.now()
+				satisfy_report_time = time_difference(satisfy_output_start, satisfy_output_finish)
+				satisfy_log = 'Output: {} satisfied. Time taken: {}'.format(get_id(output_node), satisfy_report_time)
+				logging.info(satisfy_log)
+				report_add(satisfy_log)
 				locks = get_all_locks()
 				if locks:
 					logging.info('Found these locks: {}. Trying to satisfy the output again'.format(str(locks)))
@@ -600,7 +621,12 @@ def corec_init(**kwargs):
 	reset_locks()
 	delete_progress()
 	report_init()
+	init_start = datetime.datetime.now()
 	execute_pipeline(kwargs['pipeline'])
+	init_finish = datetime.datetime.now()
+	init_log = 'Overall time taken: {}'.format(time_difference(init_start, init_finish))
+	logging.info(init_log)
+	report_add(init_log)
 	report_finalize()
 
 @command_line
