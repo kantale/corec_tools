@@ -43,7 +43,7 @@ def now():
 
 def time_difference(start, finish):
 	# Use with datetime.datetime.now()
-	return str(start-finish)
+	return str(finish-start)
 
 def get_uuid():
 	return str(uuid.uuid4()).split('-')[-1]
