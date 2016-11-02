@@ -43,6 +43,15 @@ defaults = {
 	'current_progress': '',
 }
 
+# Version dependent functions
+def corec_raw_input():
+	if sys.version_info < (3,4):
+		return raw_input
+	else:
+		return input
+
+
+
 class CORECException(Exception):
 	pass
 
@@ -230,7 +239,7 @@ def input_parameters(parameters):
 			logging.info('Using saved value for parameter {}={}'.format(p_id, p_value))
 		else:
 			request_str = 'Insert the value of parameter: {} : '.format(p_id)
-			p_value = raw_input(request_str)
+			p_value = corec_raw_input()(request_str)
 			defaults['parameters'][p_id] = p_value
 
 	save_parameters_file()
