@@ -50,7 +50,14 @@ def corec_raw_input():
 	else:
 		return input
 
+def corec_iteritems(d):
 
+	if sys.version_info < (3,4):
+		for k,v in d.iteritems():
+			yield k,v
+	else:
+		for k,v in d.items():
+			yield k,v
 
 class CORECException(Exception):
 	pass
@@ -344,7 +351,7 @@ def get_all_locks():
 	else:
 		return []
 
-	ret = [lock_name for lock_name, lock_value in locks.iteritems() if lock_value]
+	ret = [lock_name for lock_name, lock_value in corec_iteritems(locks) if lock_value]
 	return ret
 
 
