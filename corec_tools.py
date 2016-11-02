@@ -16,6 +16,14 @@ from shutil import copyfile
 
 logging.basicConfig(level=logging.DEBUG)
 
+# CHECK VERSION
+if sys.version_info[0] == 2:
+	# We are in python 2
+	if sys.version_info < (2,7):
+		logging.error('COREC RUNS in python 2.7 (or higher) or python 3')
+	else:
+		from __future__ import print_function
+
 defaults = {
 	'parameters_filename': 'corec_parameters.json',
 	'locks_filename': 'corec_locks.json',
@@ -665,9 +673,9 @@ def corec_set(parameter, value, merge, **kwargs):
 def corec_get(parameter, **kwargs):
 	load_parameters()
 	if parameter in defaults['parameters']:
-		print defaults['parameters'][parameter]
+		print (defaults['parameters'][parameter])
 	else:
-		print 'COREC_UNSET'
+		print ('COREC_UNSET')
 
 @command_line
 def corec_lock(lock_name, **kwargs):
