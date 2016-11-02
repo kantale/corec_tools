@@ -256,8 +256,14 @@ def run_bash_command(command):
 
 	process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
 
-	for line in iter(process.stdout.readline, ""):
-		logging.info('{} --> {} -> {}'.format(progress, command, line.replace('\n', '')))
+	if sys.version_info < (3,0):
+		for line in iter(process.stdout.readline, ""):
+			logging.info('{} --> {} -> {}'.format(progress, command, line.replace('\n', '')))
+	else:
+		for line in iter(process.stdout.readline, b""):
+			line_unicode = line.decode('utf-8')
+			logging.info('{} --> {} -> {}'.format(progress, command, line_unicode.replace('\n', '')))
+
 
 	output, error = process.communicate()
 	return_code = process.returncode
