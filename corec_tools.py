@@ -703,7 +703,7 @@ def corec_get(parameter, **kwargs):
 
 @command_line
 def corec_lock(lock_name, **kwargs):
-	set_lock(lock_name)
+	return set_lock(lock_name)
 
 @command_line
 def corec_unlock(lock_name, **kwargs):
@@ -711,7 +711,7 @@ def corec_unlock(lock_name, **kwargs):
 
 @command_line
 def corec_report(content, **kwargs):
-	return report_add(content)
+	report_add(content)
 
 
 # ========================== COREC COMMANDS ==================
