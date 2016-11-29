@@ -322,11 +322,14 @@ def set_lock_value(lock_name, value):
 	with open(locks_filename, 'w') as f:
 		json.dump(locks, f, indent=4)
 
+	# How many true values exist?
+	return locks.values().count(True)
+
 def set_lock(lock_name):
-	set_lock_value(lock_name, True)
+	return set_lock_value(lock_name, True)
 
 def unset_lock(lock_name):
-	set_lock_value(lock_name, False)
+	return set_lock_value(lock_name, False)
 
 def get_lock_value(lock_name):
 	locks_filename = defaults['locks_filename']
@@ -580,7 +583,7 @@ def satisfy_outputs(pipeline, output_nodes):
 		load_parameters()
 		if not get_id(output_node) in defaults['parameters']:
 			
-			while True: # Repeatidly try to satisfy this step until there is not lock
+			while True: # Repeatidly try to satisfy this step until there is no lock
 				logging.info('Satisfying output node {}/{}: {}'.format(output_node_index+1, total, get_id(output_node)))
 				satisfy_output_start = datetime.datetime.now()
 				satisfy_output(pipeline, output_node)
@@ -704,11 +707,11 @@ def corec_lock(lock_name, **kwargs):
 
 @command_line
 def corec_unlock(lock_name, **kwargs):
-	unset_lock(lock_name)
+	return unset_lock(lock_name)
 
 @command_line
 def corec_report(content, **kwargs):
-	report_add(content)
+	return report_add(content)
 
 
 # ========================== COREC COMMANDS ==================
