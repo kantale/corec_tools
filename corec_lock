@@ -12,7 +12,7 @@ if __name__ == '__main__':
 	lock_name = args.lock_name
 
 	locks = corec_lock(lock_name)
-	print locks
+	print (locks)
 
 
 	

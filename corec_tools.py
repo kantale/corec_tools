@@ -323,7 +323,7 @@ def set_lock_value(lock_name, value):
 		json.dump(locks, f, indent=4)
 
 	# How many true values exist?
-	return locks.values().count(True)
+	return list(locks.values()).count(True)
 
 def set_lock(lock_name):
 	return set_lock_value(lock_name, True)
@@ -516,23 +516,49 @@ def has_progress(progress_string):
 
 @has_progress('STEP : ')
 def execute_step(pipeline, **kwargs):
+	'''
+	Edges that set a parameter are like:      'source': 'STEP', 'target': 'PARAMETER', 'kind': 'Sets_Outputs'
+	Edges that requires a parameter are like: 'source': 'STEP', 'target': 'PARAMETER', 'kind': 'Needs_Parameter'   
+	'''
 	node = kwargs['node']
 	id_ = get_id(node)
 
+	# Dictionary of steps that need to be executed BEFORE this STEP
+	dependent_steps = {}
+
 	#Perhaps this step has input parameters that are satisfied by other steps
 	for outgoing_edge in get_outgoing_edges(pipeline, node):
+		# These are all edges leaving this step
 		if get_kind(outgoing_edge) == 'Needs_Parameter':
+			# This edge connects this step with a needed parameter
 			parameter_node_id = get_target(outgoing_edge)
 			parameter_node = get_node(pipeline, parameter_node_id)
+			# Parameter node is the needed parameter
 			# Check if this parameter is set by any other tool
 			for ingoing_edge in get_ingoing_edges(pipeline, parameter_node):
+				# Take all edges that POINT to this parameter
 				if get_kind(ingoing_edge) == 'Sets_Outputs':
+					# This is an edge that SETS this parameter
 					dependent_step_id = get_source(ingoing_edge)
 					if dependent_step_id != id_:
-						# This is a dependent step
+						# This is a STEP that SETS this parameter and is not this step..
 						dependent_step = get_node(pipeline, dependent_step_id)
-						execute_step(pipeline, node=dependent_step)
+						#execute_step(pipeline, node=dependent_step)
 
+						# Store the dependent step. Execute it later
+						if not dependent_step_id in dependent_steps:
+							dependent_steps[dependent_step_id] = {'node': dependent_step, 'parameters': [] }
+
+						if not parameter_node_id in dependent_steps[dependent_step_id]['parameters']:
+							dependent_steps[dependent_step_id]['parameters'].append(parameter_node_id)
+
+
+	# Execute all dependent steps
+	for dependent_step_id in dependent_steps:
+		logging.info('Step: {} needs parameters: {} which are set by the step: {}'.format(id_, dependent_steps[dependent_step_id]['parameters'], dependent_step_id))
+		execute_step(pipeline, node=dependent_steps[dependent_step_id]['node'])
+
+	# Execute this step
 	logging.info('Executing step: {}'.format(id_))
 
 	commands = node["data"]["bash_commands"]
