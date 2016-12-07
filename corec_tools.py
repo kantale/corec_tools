@@ -308,7 +308,7 @@ def reset_locks():
 	with open(defaults['locks_filename'], 'w') as f:
 		json.dump({}, f, indent=4)
 
-def set_lock_value(lock_name, value):
+def open_locks():
 	locks_filename = defaults['locks_filename']
 
 	if os.path.isfile(locks_filename):
@@ -316,6 +316,13 @@ def set_lock_value(lock_name, value):
 			locks = json.load(f)
 	else:
 		locks = {}
+
+	return locks_filename, locks
+
+
+def set_lock_value(lock_name, value):
+
+	locks_filename, locks = open_locks()
 
 	locks[lock_name] = value
 
@@ -331,14 +338,9 @@ def set_lock(lock_name):
 def unset_lock(lock_name):
 	return set_lock_value(lock_name, False)
 
-def get_lock_value(lock_name):
-	locks_filename = defaults['locks_filename']
 
-	if os.path.isfile(locks_filename):
-		with open(locks_filename) as f:
-			locks = json.load(f)
-	else:
-		locks = {}
+def get_lock_value(lock_name):
+	locks_filename, locks = open_locks()
 
 	if lock_name in locks:
 		return locks[lock_name]
@@ -734,6 +736,16 @@ def corec_lock(lock_name, **kwargs):
 @command_line
 def corec_unlock(lock_name, **kwargs):
 	return unset_lock(lock_name)
+
+@command_line
+def corec_get_lock(lock_name, **kwargs):
+	lock_value = get_lock_value(lock_name)
+
+	if lock_value:
+		print (1)
+	else:
+		print (0)
+
 
 @command_line
 def corec_report(content, **kwargs):
