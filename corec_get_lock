@@ -1,0 +1,18 @@
+#! /usr/bin/env python
+
+import argparse
+from corec_tools import corec_get_lock
+
+if __name__ == '__main__':
+
+	parser = argparse.ArgumentParser(description='corec_get_lock')
+	parser.add_argument('lock_name', type=str, help='Name of lock')
+	args = parser.parse_args()
+
+	lock_name = args.lock_name
+
+	corec_get_lock(lock_name)
+
+
+
+	
