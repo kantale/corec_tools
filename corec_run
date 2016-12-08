@@ -1,0 +1,16 @@
+#! /usr/bin/env python
+
+import argparse
+from corec_tools import corec_run
+
+if __name__ == '__main__':
+
+	parser = argparse.ArgumentParser(description='corec_run')
+	parser.add_argument('step_name', type=str, help='Name of step')
+	args = parser.parse_args()
+
+	step_name = args.step_name
+
+	corec_run(step_name)
+
+	
