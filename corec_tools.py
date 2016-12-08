@@ -517,11 +517,12 @@ def has_progress(progress_string):
 	return decorator
 
 def execute_step_non_recursive(node):
+	step_name=get_id(node)
 	commands = node["data"]["bash_commands"]
 	step_start = datetime.datetime.now()
 	execute_commands('step', node, commands)
 	step_finish = datetime.datetime.now()
-	step_log = 'Step {} finished. Time taken: {}'.format(id_, time_difference(step_start, step_finish))
+	step_log = 'Step {} finished. Time taken: {}'.format(step_name, time_difference(step_start, step_finish))
 	logging.info(step_log)
 	report_add(step_log)
 
