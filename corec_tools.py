@@ -516,6 +516,16 @@ def has_progress(progress_string):
 		return wrapper
 	return decorator
 
+def execute_step_non_recursive(node):
+	commands = node["data"]["bash_commands"]
+	step_start = datetime.datetime.now()
+	execute_commands('step', node, commands)
+	step_finish = datetime.datetime.now()
+	step_log = 'Step {} finished. Time taken: {}'.format(id_, time_difference(step_start, step_finish))
+	logging.info(step_log)
+	report_add(step_log)
+
+
 @has_progress('STEP : ')
 def execute_step(pipeline, **kwargs):
 	'''
@@ -562,14 +572,37 @@ def execute_step(pipeline, **kwargs):
 
 	# Execute this step
 	logging.info('Executing step: {}'.format(id_))
+	execute_step_non_recursive(node)
 
-	commands = node["data"]["bash_commands"]
-	step_start = datetime.datetime.now()
-	execute_commands('step', node, commands)
-	step_finish = datetime.datetime.now()
-	step_log = 'Step {} finished. Time taken: {}'.format(id_, time_difference(step_start, step_finish))
-	logging.info(step_log)
-	report_add(step_log)
+@has_progress('STEP : ')
+def execute_step_explicitly(step_name, **kwargs):
+	'''
+	corec_run ...
+	'''
+
+	#Get the node that contains this step
+	pipeline = kwargs['pipeline']
+	node = kwargs['node']
+
+	# Are all input variables available?
+	#Perhaps this step has input parameters that are not available
+	for outgoing_edge in get_outgoing_edges(pipeline, node):
+		# These are all edges leaving this step
+		if get_kind(outgoing_edge) == 'Needs_Parameter':
+			# This edge connects this step with a needed parameter
+			parameter_node_id = get_target(outgoing_edge)
+			parameter_node = get_node(pipeline, parameter_node_id)
+
+			if not parameter_node_id in defaults['parameters']:
+				# This parameter has not been set
+				message = 'Step: {} requires the yet unset parameter: {}'.format(step_name, parameter_node_id)
+				logging.info(message)
+				request_str = 'Insert the value of parameter: {} : '.format(parameter_node_id)
+				p_value = corec_raw_input()(request_str)
+				defaults['parameters'][parameter_node_id] = p_value
+
+
+	execute_step_non_recursive(node)
 
 @has_progress('INSTALL : ')
 def install_tool(pipeline, **kwargs):
@@ -710,12 +743,29 @@ def corec_init(**kwargs):
 	logging.info(uname_log)
 	report_add(uname_log)
 	init_start = datetime.datetime.now()
-	execute_pipeline(kwargs['pipeline'])
+
+	if 'step' in kwargs and kwargs['step']:
+		step_name = kwargs['step']
+		step_node = get_node(kwargs['pipeline'], step_name)
+		if not step_node:
+			raise CORECException("Pipeline does not contain step with name: {}".format(step_name))
+
+		kwargs['node'] = step_node
+		execute_step_explicitly(step_name, **kwargs)
+	else:	
+		execute_pipeline(kwargs['pipeline'])
 	init_finish = datetime.datetime.now()
 	init_log = 'Overall time taken: {}'.format(time_difference(init_start, init_finish))
 	logging.info(init_log)
 	report_add(init_log)
 	report_finalize()
+
+@command_line
+def corec_run(step_name, **kwargs):
+	kwargs['node'] = get_node(kwargs['pipeline'], step_name)
+	if not kwargs['node']:
+		raise CORECException("Pipeline does not contain step with name: {}".format(step_name))
+	execute_step_explicitly(step_name, **kwargs)
 
 @command_line
 def corec_set(parameter, value, merge, **kwargs):

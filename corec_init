@@ -6,14 +6,16 @@ from corec_tools import corec_init
 if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser(description='corec_init')
+	parser.add_argument('--step', required=False, action="store", help="Run only this step")
 	parser.add_argument('--mock', required=False, action='store_true', help="Only print executing steps")
 	parser.add_argument('--ignore_return_code', required=False, action='store_true', help="Ignore non zero return codes")
 	args = parser.parse_args()
 	
+	step = args.step
 	mock = args.mock
 	ignore_return_code = args.ignore_return_code
 
-	corec_init(mock=mock, ignore_return_code=ignore_return_code)
+	corec_init(step=step, mock=mock, ignore_return_code=ignore_return_code)
 
 
 	
