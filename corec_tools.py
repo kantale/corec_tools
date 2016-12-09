@@ -598,8 +598,9 @@ def execute_step_explicitly(step_name, **kwargs):
 				# This parameter has not been set
 				message = 'Step: {} requires the yet unset parameter: {}'.format(step_name, parameter_node_id)
 				logging.info(message)
-				request_str = 'Insert the value of parameter: {} : '.format(parameter_node_id)
-				p_value = corec_raw_input()(request_str)
+				message = ' #### ATENTION #### Insert the value of parameter: {} : '.format(parameter_node_id) # Since the stdout is captured we show this in log
+				logging.info(message)
+				p_value = corec_raw_input()()
 				defaults['parameters'][parameter_node_id] = p_value
 
 
